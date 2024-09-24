@@ -9,20 +9,24 @@ type WordPair = {
   english: string;
 };
 
-// Load word list from JSON file
-
-
 const App: React.FC = () => {
   const [showGame, setShowGame] = useState(false); // State to toggle the Game component
   const [showScoreboard, setShowScoreboard] = useState(false);
-  const wordList: WordPair[] = wordData.wordList.slice(0, 10);
+  const [gameWords, setGameWords] = useState<WordPair[]>([]);
 
   // Function to start the game
   const handleStartGame = (name: string) => {
-    setShowGame(true); // Set the state to true to show the Game component
+    const selectedWords = selectRandomWords(wordData.wordList, 10);
+    setGameWords(selectedWords);
+    setShowGame(true);
     setShowScoreboard(false);
   };
 
+  // Function to randomly select n words from the array
+  const selectRandomWords = (wordsArray: WordPair[], n: number): WordPair[] => {
+    const shuffled = [...wordsArray].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(n, shuffled.length));
+  };
 
   const handleShowScoreboard = () => {
     setShowScoreboard(true);
@@ -33,16 +37,19 @@ const App: React.FC = () => {
     setShowScoreboard(false);
   };
 
-
   return (
     <div>
       {/* Render the MainMenu component if showGame is false */}
       {!showGame && !showScoreboard && (
-        <MainMenu onStartGame={handleStartGame}
-          onShowScoreboard={handleShowScoreboard} />)}
+        <MainMenu 
+          onStartGame={handleStartGame}
+          onShowScoreboard={handleShowScoreboard} 
+        />
+      )}
       {/* Render the Game component if showGame is true */}
-      {showGame && <Game words={wordList}/>}
-      {showScoreboard && <Scoreboard onClose={handleCloseScoreboard}/>}
+      {showGame && <Game words={gameWords} />}
+      {/* Render the Scoreboard component if showScoreboard is true */}
+      {showScoreboard && <Scoreboard onClose={handleCloseScoreboard} />}
     </div>
   );
 };
