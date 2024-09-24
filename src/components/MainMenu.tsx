@@ -25,6 +25,9 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onShowScoreboard }) =>
 
   return (
     <div className="main-menu">
+      <div className="menu-title">
+        Word Matcher Game
+      </div>
       <input
         type="text"
         placeholder="Enter your name"
