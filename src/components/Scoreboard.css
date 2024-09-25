@@ -1,0 +1,19 @@
+.score-container {
+    text-align: center;
+    margin: 50px;
+}
+
+.score-container h1 {
+    font-size: 2em;
+    color: #333;
+}
+
+.score-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.score-container li {
+    font-size: 1.5em;
+    margin: 10px 0;
+}
