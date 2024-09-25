@@ -64,7 +64,7 @@ const Game: React.FC<GameProps> = ({words, onFinish, playerName}) => {
     } else {
       setIncorrectPair({ hungarian, english });
       setTimeout(() => setIncorrectPair(null), 1000);
-      setScore(prev => prev - 1);
+      setScore(prev => Math.max(0, prev - 1));
     }
   }, [words]);
 
