@@ -9,7 +9,7 @@ interface WordPair {
 
 interface GameProps {
   words: WordPair[];
-  onFinish: (score: number) => void;
+  onFinish: (score: number, playerName: string) => void;
   playerName: string;
 }
 
@@ -34,9 +34,9 @@ const Game: React.FC<GameProps> = ({words, onFinish, playerName}) => {
       // Check if the game is finished
   useEffect(() => {
     if (matchedPairs.size === words.length) {
-      onFinish(score);
+      onFinish(score,playerName);
     }
-  }, [matchedPairs, words.length, score, onFinish]);
+  }, [matchedPairs, words.length, score, onFinish,playerName]);
 
     const handleWordSelection = useCallback((language: 'hungarian' | 'english', word: string) => {
       const setSelected = language === 'hungarian' ? setSelectedHungarian : setSelectedEnglish;

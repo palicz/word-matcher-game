@@ -1,9 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import MainMenu from './components/MainMenu';
 import Game from './components/Game';
-import wordData from './words.json';
 import Scoreboard from './components/Scoreboard';
-
+import wordData from './words.json';
 
 type WordPair = {
   hungarian: string;
@@ -11,25 +10,30 @@ type WordPair = {
 };
 
 const App: React.FC = () => {
-  const [showGame, setShowGame] = useState(false); // State to toggle the Game component
+  const [showGame, setShowGame] = useState(false);
   const [showScoreboard, setShowScoreboard] = useState(false);
   const [gameWords, setGameWords] = useState<WordPair[]>([]);
   const [username, setUsername] = useState<string>('');
-  const [userScores, setUserScores] = useState<Array<{ username: string; score: number }>>([]);
-  const scores = [
-    { playerName: 'John', score: 5 },
-    { playerName: 'Jane', score: 8 },
-  ]; // Mock data for scores
+  const [scores, setScores] = useState<Array<{ playerName: string; score: number }>>([]);
+
+  // Fetch scores from localStorage when the app starts
+  useEffect(() => {
+    const savedScores = localStorage.getItem('scores');
+    if (savedScores) {
+      setScores(JSON.parse(savedScores));
+    }
+  }, []);
+
   // Function to start the game
   const handleStartGame = (name: string) => {
     const selectedWords = selectRandomWords(wordData.wordList, 10);
     setGameWords(selectedWords);
     setShowGame(true);
     setShowScoreboard(false);
-    setUsername(name); // Set the username when starting the game
+    setUsername(name);
   };
 
-  // Function to randomly select n words from the array
+  // Function to select random words from word list
   const selectRandomWords = (wordsArray: WordPair[], n: number): WordPair[] => {
     const shuffled = [...wordsArray].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, Math.min(n, shuffled.length));
@@ -44,12 +48,18 @@ const App: React.FC = () => {
     setShowScoreboard(false);
   };
 
-  // Handler for finishing the game
+  // Function to handle finishing the game and saving the score
   const handleFinishGame = useCallback((score: number) => {
-    setUserScores(prevScores => [...prevScores, { username, score }]);
+    const newScore = { playerName: username, score };
+    const updatedScores = [...scores, newScore];
+
+    // Save updated scores in localStorage
+    localStorage.setItem('scores', JSON.stringify(updatedScores));
+
+    setScores(updatedScores); // Update the state with new scores
     setShowGame(false);
     setShowScoreboard(true);
-  }, [username]);
+  }, [username, scores]);
 
   return (
     <div>
