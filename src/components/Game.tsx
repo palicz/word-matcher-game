@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './Game.css';
 
 // Define types for better code readability and type safety
@@ -9,69 +9,91 @@ interface WordPair {
 
 interface GameProps {
   words: WordPair[];
-  onFinish: (score: number, playerName: string) => void;
+  onFinish: (score: number, finishTime: number) => void;  // Include finishTime in the callback
   playerName: string;
 }
 
+
 // Main Game component
-const Game: React.FC<GameProps> = ({words, onFinish, playerName}) => {
-    // State management using hooks
-    const [shuffledHungarianWords, setShuffledHungarianWords] = useState<WordPair[]>([]);
-    const [shuffledEnglishWords, setShuffledEnglishWords] = useState<WordPair[]>([]);
-    const [selectedHungarian, setSelectedHungarian] = useState<string | null>(null);
-    const [selectedEnglish, setSelectedEnglish] = useState<string | null>(null);
-    const [score, setScore] = useState(0);
-    const [matchedPairs, setMatchedPairs] = useState<Set<string>>(new Set());
-    const [incorrectPair, setIncorrectPair] = useState<{ hungarian: string, english: string } | null>(null);
-    const [currentMatchedPair, setCurrentMatchedPair] = useState<{ hungarian: string, english: string } | null>(null);
+const Game: React.FC<GameProps> = ({ words, onFinish, playerName }) => {
+  const [shuffledHungarianWords, setShuffledHungarianWords] = useState<WordPair[]>([]);
+  const [shuffledEnglishWords, setShuffledEnglishWords] = useState<WordPair[]>([]);
+  const [selectedHungarian, setSelectedHungarian] = useState<string | null>(null);
+  const [selectedEnglish, setSelectedEnglish] = useState<string | null>(null);
+  const [score, setScore] = useState(0);
+  const [matchedPairs, setMatchedPairs] = useState<Set<string>>(new Set());
+  const [incorrectPair, setIncorrectPair] = useState<{ hungarian: string, english: string } | null>(null);
+  const [currentMatchedPair, setCurrentMatchedPair] = useState<{ hungarian: string, english: string } | null>(null);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const timerRef = useRef<number | null>(null);
+  const [finishTime, setFinishTime] = useState<number | null>(null);
 
-    // Shuffle words when the component mounts
-    useEffect(() => {
-        setShuffledHungarianWords([...words].sort(() => Math.random() - 0.5));
-        setShuffledEnglishWords([...words].sort(() => Math.random() - 0.5));
-    }, [words]);
 
-      // Check if the game is finished
+  // Shuffle words when the component mounts
+  useEffect(() => {
+    setShuffledHungarianWords([...words].sort(() => Math.random() - 0.5));
+    setShuffledEnglishWords([...words].sort(() => Math.random() - 0.5));
+  }, [words]);
+
   useEffect(() => {
     if (matchedPairs.size === words.length) {
-      onFinish(score,playerName);
-    }
-  }, [matchedPairs, words.length, score, onFinish,playerName]);
-
-    const handleWordSelection = useCallback((language: 'hungarian' | 'english', word: string) => {
-      const setSelected = language === 'hungarian' ? setSelectedHungarian : setSelectedEnglish;
-      const otherSelected = language === 'hungarian' ? selectedEnglish : selectedHungarian;
-  
-      setSelected((prev) => (prev === word ? null : word));
-  
-      if (otherSelected) {
-        checkMatch(language === 'hungarian' ? word : otherSelected, language === 'english' ? word : otherSelected);
-        setSelectedHungarian(null);
-        setSelectedEnglish(null);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);  // Stop the timer
       }
-    }, [selectedHungarian, selectedEnglish]);
+      setIsTimerRunning(false);
+      setFinishTime(timeElapsed);  // Store the final completion time
+      onFinish(score, timeElapsed);  // Pass score and time to the onFinish callback
+    }
+  }, [matchedPairs, words.length, score, onFinish, timeElapsed]);
+  
+  
+
+  const handleWordSelection = useCallback((language: 'hungarian' | 'english', word: string) => {
+    const setSelected = language === 'hungarian' ? setSelectedHungarian : setSelectedEnglish;
+    const otherSelected = language === 'hungarian' ? selectedEnglish : selectedHungarian;
+
+    setSelected((prev) => (prev === word ? null : word));
+
+    if (otherSelected) {
+      checkMatch(language === 'hungarian' ? word : otherSelected, language === 'english' ? word : otherSelected);
+      setSelectedHungarian(null);
+      setSelectedEnglish(null);
+    }
+  }, [selectedHungarian, selectedEnglish]);
 
   // Check if the selected words match
   const checkMatch = useCallback((hungarian: string, english: string) => {
-    const isMatch = words.some(word => word.hungarian === hungarian && word.english === english);
-    if (isMatch) {
-      setCurrentMatchedPair({ hungarian, english });
-      setTimeout(() => {
-        setMatchedPairs(prev => new Set(prev).add(hungarian));
-        setCurrentMatchedPair(null);
+  const isMatch = words.some(word => word.hungarian === hungarian && word.english === english);
+  
+  if (isMatch) {
+    setCurrentMatchedPair({ hungarian, english });
+    
+    // Start the timer on the first match
+    if (!isTimerRunning) {
+      setIsTimerRunning(true);
+      timerRef.current = window.setInterval(() => {
+        setTimeElapsed(prev => prev + 1);  // Increment time every second
       }, 1000);
-      setScore(prev => prev + 1);
-    } else {
-      setIncorrectPair({ hungarian, english });
-      setTimeout(() => setIncorrectPair(null), 1000);
-      setScore(prev => Math.max(0, prev - 1));
     }
-  }, [words]);
 
-    // Helper functions for rendering
-    const isMatched = useCallback((hungarian: string) => matchedPairs.has(hungarian), [matchedPairs]);
-    const isCurrentMatched = useCallback((hungarian: string, english: string) => 
-      currentMatchedPair?.hungarian === hungarian && currentMatchedPair?.english === english, 
+    setTimeout(() => {
+      setMatchedPairs(prev => new Set(prev).add(hungarian));
+      setCurrentMatchedPair(null);
+    }, 1000);
+    setScore(prev => prev + 1);
+  } else {
+    setIncorrectPair({ hungarian, english });
+    setTimeout(() => setIncorrectPair(null), 1000);
+    setScore(prev => Math.max(0, prev - 1));
+  }
+}, [words, isTimerRunning]);
+
+
+  // Helper functions for rendering
+  const isMatched = useCallback((hungarian: string) => matchedPairs.has(hungarian), [matchedPairs]);
+  const isCurrentMatched = useCallback((hungarian: string, english: string) =>
+    currentMatchedPair?.hungarian === hungarian && currentMatchedPair?.english === english,
     [currentMatchedPair]);
 
   // Render word element
@@ -92,24 +114,28 @@ const Game: React.FC<GameProps> = ({words, onFinish, playerName}) => {
     );
   }, [selectedHungarian, selectedEnglish, incorrectPair, handleWordSelection, isMatched, isCurrentMatched]);
 
-    // Render the game
-    return (
-        <div className="game-container">
-            <div className="columns">
-                <div className="column">
-                    {shuffledHungarianWords.map(word => renderWord(word, 'hungarian'))}
-                </div>
-                <div className="column">
-                    {shuffledEnglishWords.map(word => renderWord(word, 'english'))}
-                </div>
-            </div>
-            <div className="score-container">
-              <div className="player-score">
-                      {playerName}'s score: {score}
-              </div>
-            </div>
-        </div>
-    );
+  // Render the game
+return (
+  <div className="game-container">
+    <div className="score-container">
+      <div className="player-score">
+        {playerName}'s score: {score}
+      </div>
+      <div className="timer">
+        Time: {Math.floor(timeElapsed / 60)}:{(timeElapsed % 60).toString().padStart(2, '0')}
+      </div>
+    </div>
+    <div className="columns">
+      <div className="column">
+        {shuffledHungarianWords.map(word => renderWord(word, 'hungarian'))}
+      </div>
+      <div className="column">
+        {shuffledEnglishWords.map(word => renderWord(word, 'english'))}
+      </div>
+    </div>
+  </div>
+);
+
 };
 
 export default Game;
