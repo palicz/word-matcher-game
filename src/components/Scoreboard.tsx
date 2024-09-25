@@ -14,14 +14,28 @@ const Scoreboard: React.FC<ScoreboardProps> = ({scores,onClose}) => {
   return (
     <div className="score-container">
       <h1>Scoreboard</h1>
-        <ul>
-            {scores.map((score, index) => (
-                <li key={index}>
-                    {index + 1}. {score.playerName}: {score.score}
-                </li>
-            ))}
-        </ul>
-    <button onClick={onClose}>Close</button>
+        <table className="score-table">
+            <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player Name</th>
+                <th>Score</th>
+            </tr>
+            </thead>
+            <tbody>
+            {scores
+                .sort((a, b) => b.score - a.score) // Sort scores in descending order
+                .map((score, index) => (
+                    <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{score.playerName}</td>
+                        <td>{score.score}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    <button onClick={onClose} className="close-button">Close</button>
+
     </div>
   )
 };
