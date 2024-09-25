@@ -13,9 +13,12 @@ interface ScoreboardProps {
 const Scoreboard: React.FC<ScoreboardProps> = ({scores,onClose}) => {
   return (
     <div className="score-container">
-      <h1>Scoreboard</h1>
+
         <table className="score-table">
             <thead>
+            <tr>
+                <th colSpan={3}> <h1 className="scoreboard-title">Scoreboard</h1></th>
+            </tr>
             <tr>
                 <th>Rank</th>
                 <th>Player Name</th>
