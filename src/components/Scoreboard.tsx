@@ -1,7 +1,12 @@
 import React from 'react';
 import './Scoreboard.css';
 
+interface Score {
+    playerName: string;
+    score: number;
+}
 interface ScoreboardProps {
+    scores: Score[];
     onClose: () => void;
 }
 
