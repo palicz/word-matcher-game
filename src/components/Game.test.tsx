@@ -18,6 +18,9 @@
   - correct word matching is logged
   - incorrect word matching is logged
   - word deselection after checking match
+  - correct word matching and score increase
+  - incorrect word matching and score decrease
+  - multiple matches and score accumulation
 
    */}
 
@@ -36,7 +39,7 @@ const mockWords = [
 describe('Game Component', () => {
   // Test if both columns render with the correct words
   test('renders both columns with words', () => {
-    render(<Game words={mockWords} />);
+    render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
     
     mockWords.forEach(word => {
       expect(screen.getByText(word.hungarian)).toBeInTheDocument();
@@ -46,7 +49,7 @@ describe('Game Component', () => {
 
   // Test if words are shuffled on initial render
   test('shuffles words on initial render', () => {
-    const { container } = render(<Game words={mockWords} />);
+    const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
     
     const hungarianWords = container.querySelectorAll('.column:first-child .word');
     const englishWords = container.querySelectorAll('.column:last-child .word');
@@ -65,7 +68,7 @@ describe('Game Component', () => {
 
   // Test word selection and deselection functionality
   test('selects and deselects words on click', () => {
-    render(<Game words={mockWords} />);
+    render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
     
     const hungarianWord = screen.getByText('alma');
     const englishWord = screen.getByText('apple');
@@ -88,9 +91,8 @@ describe('Game Component', () => {
   });
 
   // Test correct word matching
-  test('checks for correct match', () => {
-    const consoleSpy = jest.spyOn(console, 'log');
-    render(<Game words={mockWords} />);
+  test('checks for correct match', async () => {
+    const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
     
     const hungarianWord = screen.getByText('alma');
     const englishWord = screen.getByText('apple');
@@ -99,15 +101,20 @@ describe('Game Component', () => {
     fireEvent.click(hungarianWord);
     fireEvent.click(englishWord);
 
-    // Check if correct match is logged
-    expect(consoleSpy).toHaveBeenCalledWith('Match found!');
-    consoleSpy.mockRestore();
+    // Wait for and check if the words are marked as matched
+    await waitFor(() => {
+      expect(hungarianWord).toHaveClass('matched');
+      expect(englishWord).toHaveClass('matched');
+    }, { timeout: 2000 });
+
+    // Check if the score is updated
+    const scoreElement = container.querySelector('.player-score');
+    expect(scoreElement).toHaveTextContent("TestPlayer's score: 1");
   });
 
   // Test incorrect word matching
-  test('checks for incorrect match', () => {
-    const consoleSpy = jest.spyOn(console, 'log');
-    render(<Game words={mockWords} />);
+  test('checks for incorrect match', async () => {
+    const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
     
     const hungarianWord = screen.getByText('alma');
     const englishWord = screen.getByText('dog');
@@ -116,14 +123,38 @@ describe('Game Component', () => {
     fireEvent.click(hungarianWord);
     fireEvent.click(englishWord);
 
-    // Check if incorrect match is logged
-    expect(consoleSpy).toHaveBeenCalledWith('No match');
-    consoleSpy.mockRestore();
+    // Wait for and check if the words are marked as incorrect
+    await waitFor(() => {
+      expect(hungarianWord).toHaveClass('incorrect');
+      expect(englishWord).toHaveClass('incorrect');
+    }, { timeout: 2000 });
+
+    // Check if the score is updated
+    const scoreElement = container.querySelector('.player-score');
+    expect(scoreElement).toHaveTextContent("TestPlayer's score: -1");
   });
 
   // Test word deselection after checking match
   test('deselects words after checking match', async () => {
-    render(<Game words={mockWords} />);
+    render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
+    
+    const hungarianWord = screen.getByText('alma');
+    const englishWord = screen.getByText('dog');
+
+    // Select non-matching words
+    fireEvent.click(hungarianWord);
+    fireEvent.click(englishWord);
+
+    // Wait for and check deselection
+    await waitFor(() => {
+      expect(hungarianWord).not.toHaveClass('selected');
+      expect(englishWord).not.toHaveClass('selected');
+    }, { timeout: 2000 });
+  });
+
+  // Test correct word matching and score increase
+  test('checks for correct match and increases score', async () => {
+    const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
     
     const hungarianWord = screen.getByText('alma');
     const englishWord = screen.getByText('apple');
@@ -132,10 +163,68 @@ describe('Game Component', () => {
     fireEvent.click(hungarianWord);
     fireEvent.click(englishWord);
 
-    // Wait for and check deselection
+    // Wait for and check if the words are marked as matched
     await waitFor(() => {
-      expect(hungarianWord).not.toHaveClass('selected');
-      expect(englishWord).not.toHaveClass('selected');
-    });
+      expect(hungarianWord).toHaveClass('matched');
+      expect(englishWord).toHaveClass('matched');
+    }, { timeout: 2000 });
+
+    // Check if the score is increased by 1
+    const scoreElement = container.querySelector('.player-score');
+    expect(scoreElement).toHaveTextContent("TestPlayer's score: 1");
+  });
+
+  // Test incorrect word matching and score decrease
+  test('checks for incorrect match and decreases score', async () => {
+    const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
+    
+    const hungarianWord = screen.getByText('alma');
+    const englishWord = screen.getByText('dog');
+
+    // Select non-matching words
+    fireEvent.click(hungarianWord);
+    fireEvent.click(englishWord);
+
+    // Wait for and check if the words are marked as incorrect
+    await waitFor(() => {
+      expect(hungarianWord).toHaveClass('incorrect');
+      expect(englishWord).toHaveClass('incorrect');
+    }, { timeout: 2000 });
+
+    // Check if the score is decreased by 1
+    const scoreElement = container.querySelector('.player-score');
+    expect(scoreElement).toHaveTextContent("TestPlayer's score: -1");
+  });
+
+  // Test multiple matches and score accumulation
+  test('accumulates score correctly for multiple matches', async () => {
+    const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
+    
+    // Match 1: Correct
+    fireEvent.click(screen.getByText('alma'));
+    fireEvent.click(screen.getByText('apple'));
+    
+    await waitFor(() => {
+      const scoreElement = container.querySelector('.player-score');
+      expect(scoreElement).toHaveTextContent("TestPlayer's score: 1");
+    }, { timeout: 2000 });
+
+    // Match 2: Incorrect
+    fireEvent.click(screen.getByText('kutya'));
+    fireEvent.click(screen.getByText('cat'));
+    
+    await waitFor(() => {
+      const scoreElement = container.querySelector('.player-score');
+      expect(scoreElement).toHaveTextContent("TestPlayer's score: 0");
+    }, { timeout: 2000 });
+
+    // Match 3: Correct
+    fireEvent.click(screen.getByText('macska'));
+    fireEvent.click(screen.getByText('cat'));
+    
+    await waitFor(() => {
+      const scoreElement = container.querySelector('.player-score');
+      expect(scoreElement).toHaveTextContent("TestPlayer's score: 1");
+    }, { timeout: 2000 });
   });
 });
