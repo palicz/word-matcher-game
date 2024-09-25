@@ -129,9 +129,9 @@ describe('Game Component', () => {
       expect(englishWord).toHaveClass('incorrect');
     }, { timeout: 2000 });
 
-    // Check if the score is updated
+    // Check if the score remains at 0 (minimum score)
     const scoreElement = container.querySelector('.player-score');
-    expect(scoreElement).toHaveTextContent("TestPlayer's score: -1");
+    expect(scoreElement).toHaveTextContent("TestPlayer's score: 0");
   });
 
   // Test word deselection after checking match
@@ -175,7 +175,7 @@ describe('Game Component', () => {
   });
 
   // Test incorrect word matching and score decrease
-  test('checks for incorrect match and decreases score', async () => {
+  test('checks for incorrect match and score remains at minimum', async () => {
     const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
     
     const hungarianWord = screen.getByText('alma');
@@ -191,9 +191,9 @@ describe('Game Component', () => {
       expect(englishWord).toHaveClass('incorrect');
     }, { timeout: 2000 });
 
-    // Check if the score is decreased by 1
+    // Check if the score remains at 0 (minimum score)
     const scoreElement = container.querySelector('.player-score');
-    expect(scoreElement).toHaveTextContent("TestPlayer's score: -1");
+    expect(scoreElement).toHaveTextContent("TestPlayer's score: 0");
   });
 
   // Test multiple matches and score accumulation
