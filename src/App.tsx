@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import MainMenu from './components/MainMenu';
 import Game from './components/Game';
 import wordData from './words.json';
@@ -13,6 +13,8 @@ const App: React.FC = () => {
   const [showGame, setShowGame] = useState(false); // State to toggle the Game component
   const [showScoreboard, setShowScoreboard] = useState(false);
   const [gameWords, setGameWords] = useState<WordPair[]>([]);
+  const [username, setUsername] = useState<string>('');
+  const [userScores, setUserScores] = useState<Array<{ username: string; score: number }>>([]);
 
   // Function to start the game
   const handleStartGame = (name: string) => {
@@ -20,6 +22,7 @@ const App: React.FC = () => {
     setGameWords(selectedWords);
     setShowGame(true);
     setShowScoreboard(false);
+    setUsername(name); // Set the username when starting the game
   };
 
   // Function to randomly select n words from the array
@@ -37,6 +40,13 @@ const App: React.FC = () => {
     setShowScoreboard(false);
   };
 
+  // Handler for finishing the game
+  const handleFinishGame = useCallback((score: number) => {
+    setUserScores(prevScores => [...prevScores, { username, score }]);
+    setShowGame(false);
+    setShowScoreboard(true);
+  }, [username]);
+
   return (
     <div>
       {/* Render the MainMenu component if showGame is false */}
@@ -47,7 +57,7 @@ const App: React.FC = () => {
         />
       )}
       {/* Render the Game component if showGame is true */}
-      {showGame && <Game words={gameWords} />}
+      {showGame && <Game words={gameWords} onFinish={handleFinishGame} playerName={username} />}
       {/* Render the Scoreboard component if showScoreboard is true */}
       {showScoreboard && <Scoreboard onClose={handleCloseScoreboard} />}
     </div>
