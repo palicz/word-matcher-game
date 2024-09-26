@@ -62,32 +62,35 @@ const Game: React.FC<GameProps> = ({ words, onFinish, playerName }) => {
     }
   }, [selectedHungarian, selectedEnglish]);
 
-  // Check if the selected words match
   const checkMatch = useCallback((hungarian: string, english: string) => {
-  const isMatch = words.some(word => word.hungarian === hungarian && word.english === english);
+    const isMatch = words.some(word => word.hungarian === hungarian && word.english === english);
   
-  if (isMatch) {
-    setCurrentMatchedPair({ hungarian, english });
-    
-    // Start the timer on the first match
-    if (!isTimerRunning) {
-      setIsTimerRunning(true);
-      timerRef.current = window.setInterval(() => {
-        setTimeElapsed(prev => prev + 1);  // Increment time every second
-      }, 1000);
-    }
-
-    setTimeout(() => {
+    if (isMatch) {
+      setCurrentMatchedPair({ hungarian, english });
+      
+      // Start the timer on the first match
+      if (!isTimerRunning) {
+        setIsTimerRunning(true);
+        timerRef.current = window.setInterval(() => {
+          setTimeElapsed(prev => prev + 1);  // Increment time every second
+        }, 1000);
+      }
+  
+      // Immediately hide the words by updating matchedPairs state
       setMatchedPairs(prev => new Set(prev).add(hungarian));
-      setCurrentMatchedPair(null);
-    }, 1000);
-    setScore(prev => prev + 1);
-  } else {
-    setIncorrectPair({ hungarian, english });
-    setTimeout(() => setIncorrectPair(null), 1000);
-    setScore(prev => Math.max(0, prev - 1));
-  }
-}, [words, isTimerRunning]);
+  
+      // Delay only the visual indicator (green color) and then remove it
+      setTimeout(() => {
+        setCurrentMatchedPair(null);
+      }, 1000);
+  
+      setScore(prev => prev + 1);
+    } else {
+      setIncorrectPair({ hungarian, english });
+      setTimeout(() => setIncorrectPair(null), 1000);
+      setScore(prev => Math.max(0, prev - 1));
+    }
+  }, [words, isTimerRunning]);
 
 
   // Helper functions for rendering
@@ -107,7 +110,7 @@ const Game: React.FC<GameProps> = ({ words, onFinish, playerName }) => {
         key={wordText}
         className={`word ${isSelected ? 'selected' : ''} ${isCurrentMatched(word.hungarian, word.english) ? 'matched' : ''} ${isIncorrect ? 'incorrect' : ''}`}
         onClick={() => handleWordSelection(language, wordText)}
-        style={{ display: isMatched(word.hungarian) ? 'none' : 'block' }}
+        style={{ visibility: isMatched(word.hungarian) ? 'hidden' : 'visible' }}
       >
         {wordText}
       </div>

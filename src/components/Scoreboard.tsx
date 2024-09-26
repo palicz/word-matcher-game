@@ -12,7 +12,7 @@ interface ScoreboardProps {
 
 const Scoreboard: React.FC<ScoreboardProps> = ({scores,onClose}) => {
   return (
-    <div className="score-container">
+    <div className="scoreboard-container">
 
         <table className="score-table">
             <thead>
@@ -37,8 +37,9 @@ const Scoreboard: React.FC<ScoreboardProps> = ({scores,onClose}) => {
                 ))}
             </tbody>
         </table>
-    <button onClick={onClose} className="close-button">Close</button>
-
+    <div className="close-button-container">
+        <button onClick={onClose} className="close-button">Close</button>
+    </div>           
     </div>
   )
 };

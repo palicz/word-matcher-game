@@ -1,119 +1,151 @@
 .game-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 200vh;
-    background-color: #fffbf7;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #fffbf7;
+  padding: 0px;
+}
+
+.columns {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.word {
+  height: 20px;
+  width: 80px;
+  padding: 0.5em 0.5em;
+  border: none;
+  background-color: #0077b6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 5px;
+  color: #fffbf7;
+  text-align: center;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.word.selected {
+  background-color: #008080;
+}
+
+.word:hover {
+  background-color: #008080;
+  transform: scale(1.05);
+}
+
+
+
+.word.matched {
+  background-color: #28a745;
+  color: white;
+  animation: fadeOut 1s forwards;
+}
+
+.word.incorrect {
+  background-color: #dc3545;
+  color: white;
+  animation: vibrate 0.5s;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
   }
-  
+}
+
+@keyframes vibrate {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.score-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 0.5em;
+}
+
+.player-score {
+  font-size: 1.4em;
+  font-weight: bold;
+  padding: 1em 2em;
+  border-radius: 10px;
+  border: none;
+  color: #fffbf7;
+  transition: all 0.3s ease;
+  margin-bottom: 0.3em;
+  background-color: #007BFF;
+}
+
+.player-score:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.timer {
+  font-size: 1em;
+  font-weight: bold;
+  padding: 0.5em 1em;
+  background-color: #007BFF;
+  border-radius: 10px;
+  border: none;
+  color: #fffbf7;
+  transition: all 0.3s ease;
+  margin-top: 0.3em;
+}
+
+.timer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
   .columns {
-    display: flex;
-    gap: 40px;
-  }
-  
-  .column {
-    display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
   }
-  
+
   .word {
-    height: 20px;
-    width: 80px;
-    padding: 10px 15px;
-    border: none;
-    background-color: #0077b6;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 5px;
-    color: #fffbf7;
-    text-align: center;
-  }
-
-  .word.selected {
-    background-color: #008080;
-  }
-  
-  .word:hover {
-    background-color: #008080;
-    transform: scale(1.05);
-  }
-
-  .score {
-    font-size: 20px;
-  }
-
-  .word.matched {
-    background-color: #28a745;
-    color: white;
-    animation: fadeOut 1s forwards;
-  }
-  
-  .word.incorrect {
-    background-color: #dc3545;
-    color: white;
-    animation: vibrate 0.5s;
-  }
-  
-  @keyframes fadeOut {
-    to {
-      opacity: 0;
-    }
-  }
-  
-  @keyframes vibrate {
-    0%, 100% {
-      transform: translateX(0);
-    }
-    25% {
-      transform: translateX(-4px);
-    }
-    75% {
-      transform: translateX(4px);
-    }
-  }
-
-  .score-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  
-  .player-score {
-    font-size: 2em;
-    font-weight: bold;
-    padding: 15px 20px;
-    background-color: #007BFF;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: none;
-    color: #fffbf7;
-    transition: all 0.3s ease;
-    margin: 5px;
-  }
-
-  .player-score:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-  }
-
-
-  .timer {
+    width: 100px;
+    padding: 10px;
     font-size: 1.2em;
-    font-weight: bold;
-    padding: 15px 20px;
-    background-color: #007BFF;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: none;
-    color: #fffbf7;
-    transition: all 0.3s ease;
-    margin: 5px;
   }
 
-  .timer:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  .player-score, .timer {
+    font-size: 1em;
+    padding: 10px 15px;
   }
+}
+
+@media (max-width: 480px) {
+  .word {
+    width: 80px;
+    padding: 8px;
+    font-size: 1em;
+  }
+
+  .player-score, .timer {
+    font-size: 1.2em;
+    padding: 8px 12px;
+  }
+}

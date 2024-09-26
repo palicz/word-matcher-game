@@ -1,6 +1,9 @@
-.score-container {
+.scoreboard-container {
     text-align: center;
-    padding: 20px;
+    margin-bottom: 0.5em;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1em;
 }
 
 .score-table {
@@ -32,28 +35,31 @@
 
 .score-table td {
     text-align: center;
-    border: 2px solid #007BFF;
 }
 
-/* Make the 'Rank' and 'Score' columns the same width */
 .score-table th:nth-child(1), 
 .score-table th:nth-child(3), 
 .score-table td:nth-child(1), 
 .score-table td:nth-child(3) {
-    width: 100px; /* Set equal width for 'Rank' and 'Score' columns */
+    width: 100px;
+}
+
+
+.close-button-container {
+    display: flex;
+    justify-content: center; /* Horizontally center the button */
+    margin-top: 20px;
 }
 
 .close-button {
     border-radius: 5px;
-    align-self: center;
-    width: 25%;
-    margin-top: 20px;
     padding: 10px 20px;
     background-color: #007BFF;
     color: #fffbf7;
     border: none;
     cursor: pointer;
     font-size: 16px;
+    width: auto; /* Allow the button to adjust its width based on content */
 }
 
 .close-button:hover {

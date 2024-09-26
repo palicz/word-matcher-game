@@ -227,4 +227,102 @@ describe('Game Component', () => {
       expect(scoreElement).toHaveTextContent("TestPlayer's score: 1");
     }, { timeout: 2000 });
   });
+
+  // Test timer starts when the first match is made
+test('starts timer on first match', async () => {
+  jest.useFakeTimers();  // Use fake timers for testing
+  const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
+  
+  // Select the first matching words
+  fireEvent.click(screen.getByText('alma'));  // Hungarian
+  fireEvent.click(screen.getByText('apple')); // English
+
+  // Fast-forward until all timers have been executed
+  jest.advanceTimersByTime(1000); // 1 second
+  
+  const timerElement = container.querySelector('.timer');
+  expect(timerElement).toHaveTextContent('Time: 0:01'); // Expect 1 second elapsed
+});
+
+// Test timer increments every second
+test('increments timer every second', async () => {
+  jest.useFakeTimers();
+  const { container } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
+  
+  // Simulate first match to start the timer
+  fireEvent.click(screen.getByText('alma'));  // Hungarian
+  fireEvent.click(screen.getByText('apple')); // English
+
+  // Fast-forward by 3 seconds
+  jest.advanceTimersByTime(3000); // 3 seconds
+
+  const timerElement = container.querySelector('.timer');
+  expect(timerElement).toHaveTextContent('Time: 0:03'); // Expect 3 seconds elapsed
+});
+
+// Test timer stops when all pairs are matched
+test('stops timer when all pairs are matched', async () => {
+  jest.useFakeTimers();
+  const handleFinish = jest.fn(); // Mock onFinish to check the calls
+  const { container } = render(<Game words={mockWords} onFinish={handleFinish} playerName="TestPlayer" />);
+
+  // Simulate matching all words
+  fireEvent.click(screen.getByText('alma'));
+  fireEvent.click(screen.getByText('apple'));
+  fireEvent.click(screen.getByText('kutya'));
+  fireEvent.click(screen.getByText('dog'));
+  fireEvent.click(screen.getByText('macska'));
+  fireEvent.click(screen.getByText('cat'));
+
+  // Fast-forward until all timers have been executed
+  jest.runAllTimers(); // Fast-forward to completion
+
+  expect(handleFinish).toHaveBeenCalledWith(expect.any(Number), expect.any(Number)); // Check onFinish called with score and time
+  const timerElement = container.querySelector('.timer');
+  expect(timerElement).toHaveTextContent(/Time: \d+:\d+/); // Time should be displayed
+});
+
+// Test timer resets when the game is restarted
+test('resets timer when the game restarts', () => {
+  jest.useFakeTimers();
+  const { container, rerender } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
+
+  // Start the timer
+  fireEvent.click(screen.getByText('alma'));
+  fireEvent.click(screen.getByText('apple'));
+
+  // Fast-forward by 2 seconds
+  jest.advanceTimersByTime(2000);
+
+  // Rerender component (simulating a restart)
+  rerender(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
+
+  // Timer should reset to 0
+  const timerElement = container.querySelector('.timer');
+  expect(timerElement).toHaveTextContent('Time: 0:00');
+});
+
+// Test if timer stops running when the component unmounts
+test('stops timer when component unmounts', () => {
+  jest.useFakeTimers();
+  const { unmount } = render(<Game words={mockWords} onFinish={() => {}} playerName="TestPlayer" />);
+
+  // Start the timer
+  fireEvent.click(screen.getByText('alma'));
+  fireEvent.click(screen.getByText('apple'));
+
+  // Fast-forward by 2 seconds
+  jest.advanceTimersByTime(2000);
+
+  // Unmount the component
+  unmount();
+
+  // Fast-forward by 5 seconds to see if the timer continues running
+  jest.advanceTimersByTime(5000);
+
+  // Since the component is unmounted, we can't access the container anymore
+  // Instead, we need to ensure the timer has not incremented in state
+  expect(setTimeout).not.toHaveBeenCalled(); // Verify that no new timer calls were scheduled
+});
+
 });
