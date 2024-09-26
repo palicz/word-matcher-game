@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const [showScoreboard, setShowScoreboard] = useState(false);
   const [gameWords, setGameWords] = useState<WordPair[]>([]);
   const [username, setUsername] = useState<string>('');
-  const [scores, setScores] = useState<Array<{ playerName: string; score: number }>>([]);
+  const [scores, setScores] = useState<Array<{ playerName: string; score: number,timeElapsed:number }>>([]);
 
   // Fetch scores from localStorage when the app starts
   useEffect(() => {
@@ -49,8 +49,8 @@ const App: React.FC = () => {
   };
 
   // Function to handle finishing the game and saving the score
-  const handleFinishGame = useCallback((score: number) => {
-    const newScore = { playerName: username, score };
+  const handleFinishGame = useCallback((score: number,timeElapsed:number) => {
+    const newScore = { playerName: username, score,timeElapsed };
     const updatedScores = [...scores, newScore];
 
     // Save updated scores in localStorage
@@ -62,19 +62,19 @@ const App: React.FC = () => {
   }, [username, scores]);
 
   return (
-    <div>
-      {/* Render the MainMenu component if showGame is false */}
-      {!showGame && !showScoreboard && (
-        <MainMenu
-          onStartGame={handleStartGame}
-          onShowScoreboard={handleShowScoreboard}
-        />
-      )}
-      {/* Render the Game component if showGame is true */}
-      {showGame && <Game words={gameWords} onFinish={handleFinishGame} playerName={username} />}
-      {/* Render the Scoreboard component if showScoreboard is true */}
-      {showScoreboard && <Scoreboard scores={scores} onClose={handleCloseScoreboard} />}
-    </div>
+      <div>
+        {/* Render the MainMenu component if showGame is false */}
+        {!showGame && !showScoreboard && (
+            <MainMenu
+                onStartGame={handleStartGame}
+                onShowScoreboard={handleShowScoreboard}
+            />
+        )}
+        {/* Render the Game component if showGame is true */}
+        {showGame && <Game words={gameWords} onFinish={handleFinishGame} playerName={username} />}
+        {/* Render the Scoreboard component if showScoreboard is true */}
+        {showScoreboard && <Scoreboard scores={scores} onClose={handleCloseScoreboard} />}
+      </div>
   );
 };
 

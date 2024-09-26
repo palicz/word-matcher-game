@@ -3,9 +3,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import Scoreboard from './Scoreboard';
 
 const mockScores = [
-    { playerName: 'Alice', score: 30 },
-    { playerName: 'Bob', score: 50 },
-    { playerName: 'Charlie', score: 40 },
+    { playerName: 'Alice', score: 30,timeElapsed:0 },
+    { playerName: 'Bob', score: 50,timeElapsed:0 },
+    { playerName: 'Charlie', score: 40,timeElapsed:0 },
 ];
 
 describe('Scoreboard Component', () => {
