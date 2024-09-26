@@ -7,7 +7,7 @@
 }
 
 .score-table {
-    margin: 0 auto;
+    margin: 1em auto;
     width: 80%;
     border-collapse: collapse;
     background-color: #f9f9f9;
@@ -48,10 +48,12 @@
 .close-button-container {
     display: flex;
     justify-content: center; /* Horizontally center the button */
+    align-items: center;
     margin-top: 20px;
 }
 
 .close-button {
+    align-self: center;
     border-radius: 5px;
     padding: 10px 20px;
     background-color: #007BFF;
@@ -59,7 +61,7 @@
     border: none;
     cursor: pointer;
     font-size: 16px;
-    width: auto; /* Allow the button to adjust its width based on content */
+    width:  fit-content; /* Allow the button to adjust its width based on content */
 }
 
 .close-button:hover {
